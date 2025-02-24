@@ -8,6 +8,11 @@ export default defineConfig({
     outDir: 'dist'
   },
   server: {
-    historyApiFallback: true
+    historyApiFallback: {
+      disableDotRule: true,
+      rewrites: [
+        { from: /\/redirect\/.*/, to: '/index.html' }
+      ]
+    }
   }
 })
