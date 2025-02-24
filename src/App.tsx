@@ -1,19 +1,29 @@
 import { useState, useRef, useEffect } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
 import QRCode from 'qrcode'
-import { db, doc, setDoc, updateDoc, increment, onSnapshot } from './firebase'
+import { db, doc, setDoc, onSnapshot } from './firebase'
 
 function App() {
   const [url, setUrl] = useState('')
   const [qrCode, setQrCode] = useState('')
   const [scanCount, setScanCount] = useState(0)
   const [qrId, setQrId] = useState('')
-  const unsubscribeRef = useRef<() => void>()
+  const unsubscribeRef = useRef<(() => void) | null>(null)
 
   const generateQRCode = async () => {
     try {
+      if (!url) {
+        alert('Please enter a valid URL');
+        return;
+      }
+
+      // Validate URL format
+      let targetUrl = url;
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        targetUrl = `https://${url}`;
+        setUrl(targetUrl); // Update input with corrected URL
+      }
+
       // Unsubscribe previous listener if exists
       if (unsubscribeRef.current) {
         unsubscribeRef.current()
@@ -38,7 +48,7 @@ function App() {
 
       // Save original URL to Firebase
       await setDoc(qrDocRef, {
-        url: url,
+        url: targetUrl,
         scanCount: 0,
         createdAt: new Date().toISOString()
       })
@@ -59,6 +69,7 @@ function App() {
     return () => {
       if (unsubscribeRef.current) {
         unsubscribeRef.current()
+        unsubscribeRef.current = null
       }
     }
   }, [])
