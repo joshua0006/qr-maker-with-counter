@@ -9,7 +9,6 @@ export default defineConfig({
   },
   server: {
     historyApiFallback: {
-      disableDotRule: true,
       rewrites: [
         { from: /\/redirect\/.*/, to: '/index.html' }
       ]
